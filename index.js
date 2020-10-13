@@ -11,7 +11,7 @@ app.use(cookieSession({
 }));
 
 // route handler
-app.get('/', (req, res) => {
+app.get('/signup', (req, res) => {
     res.send(`
     <div>
        Your ID is: ${req.session.userId}
@@ -27,7 +27,7 @@ app.get('/', (req, res) => {
 
 
 // Post routes
-app.post('/', async (req, res) => {
+app.post('/signup', async (req, res) => {
     const { email, password, passwordConfirmation } = req.body;
 
     const existingUser = await usersRepo.getOneBy({ email: email });
@@ -46,8 +46,45 @@ app.post('/', async (req, res) => {
     res.send("account created");
 });
 
+app.get('/signout', (req, res) => {
+    req.session = null;
+    res.send('You are logged out!');
+});
 
+app.get('/signin', (reg, res) => {
+    res.send(`
+    <div>
+        <form method="POST">
+            <input name="email" placeholder="Email" />
+            <input name="password" placeholder="Password" />
+            <button>Login</button>
+        </form>
+    </div>
+    `);
+});
 
+app.post('/signin', async (req, res) => {
+    const { email, password } = req.body;
+
+    const user = await usersRepo.getOneBy({ email });
+
+    if (!user) {
+        return res.send('Email not found!');
+    }
+
+    const validPassword = await usersRepo.comparePasswords(
+        user.password,
+        password
+    );
+
+    if (!validPassword) {
+        return res.send('Invalid Password!');
+    }
+
+    req.session.userId = user.id;
+
+    res.send('You are signed in!');
+});
 
 app.listen(3000, () =>{
     console.log('Listening');
