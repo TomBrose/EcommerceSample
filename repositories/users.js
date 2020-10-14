@@ -36,7 +36,7 @@ class UsersRepository {
     const record = {
       ...attrs,
       password: `${buf.toString('hex')}.${salt}`
-    }
+    };
     records.push(record);
 
     await this.writeAll(records);
@@ -46,7 +46,7 @@ class UsersRepository {
 
   async comparePasswords(saved, supplied) {
     const [hashed, salt] = saved.split('.');
-    const hashedSuppliedBuf =  await scrypt(supplied, salt, 64);
+    const hashedSuppliedBuf = await scrypt(supplied, salt, 64);
 
     return hashed === hashedSuppliedBuf.toString('hex');
   }
@@ -73,13 +73,14 @@ class UsersRepository {
     await this.writeAll(filteredRecords);
   }
 
-  async update(id, attrs){
+  async update(id, attrs) {
     const records = await this.getAll();
     const record = records.find(record => record.id === id);
 
     if (!record) {
       throw new Error(`Record with id ${id} not found`);
     }
+
     Object.assign(record, attrs);
     await this.writeAll(records);
   }
@@ -89,7 +90,8 @@ class UsersRepository {
 
     for (let record of records) {
       let found = true;
-      for (let key in filters){
+
+      for (let key in filters) {
         if (record[key] !== filters[key]) {
           found = false;
         }
